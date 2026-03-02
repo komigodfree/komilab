@@ -4,7 +4,7 @@ title = "KOMI.LAB"
 theme = "komilab"
 paginate = 10
 enableRobotsTXT = true
-enableGitInfo = true
+enableGitInfo = false
 
 [markup]
   [markup.highlight]
@@ -62,7 +62,8 @@ enableGitInfo = true
 [outputs]
   home = ["HTML", "RSS", "JSON"]
 
-[[outputFormats.JSON]]
-  mediaType = "application/json"
-  baseName  = "search-index"
-  isPlainText = true
+[outputFormats]
+  [outputFormats.JSON]
+    mediaType   = "application/json"
+    baseName    = "search-index"
+    isPlainText = true
