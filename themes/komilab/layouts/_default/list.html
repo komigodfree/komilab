@@ -1,0 +1,93 @@
+{{ define "main" }}
+
+<div class="masthead" style="padding:2.5rem 2rem 2rem">
+  <div class="masthead-line"></div>
+  <div class="masthead-inner">
+    {{ if .IsHome }}
+    <div class="masthead-kicker">Tous les guides</div>
+    {{ else if eq .Section "veille" }}
+    <div class="masthead-kicker">Veille Cybersécurité</div>
+    <h1 class="masthead-title" style="font-size:1.8rem">Menaces, CVE et tendances</h1>
+    <p class="masthead-desc" style="margin-bottom:0">Surveillance continue des vulnérabilités et du paysage des menaces.</p>
+    {{ else if .IsSection }}
+    <div class="masthead-kicker">{{ .Section | title }}</div>
+    <h1 class="masthead-title" style="font-size:1.8rem">{{ .Title }}</h1>
+    {{ with .Description }}<p class="masthead-desc" style="margin-bottom:0">{{ . }}</p>{{ end }}
+    {{ else }}
+    <div class="masthead-kicker">{{ .Title }}</div>
+    <h1 class="masthead-title" style="font-size:1.8rem">{{ .Title }}</h1>
+    {{ end }}
+  </div>
+</div>
+
+<div class="page-wrap">
+  {{ if eq .Section "guides" }}
+  <!-- FILTER BAR pour guides -->
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" onclick="KL.filter('all',this)">Tous</button>
+    <button class="filter-btn" onclick="KL.filter('reseau',this)">Réseau</button>
+    <button class="filter-btn" onclick="KL.filter('systeme',this)">Système</button>
+    <button class="filter-btn" onclick="KL.filter('cybersecurite',this)">Cybersécurité</button>
+    <button class="filter-btn" onclick="KL.filter('cloud',this)">Cloud & Infra</button>
+    <button class="filter-btn" onclick="KL.filter('grc',this)">GRC</button>
+    <button class="filter-btn" onclick="KL.filter('automatisation',this)">Automatisation</button>
+  </div>
+  {{ end }}
+
+  {{ if eq .Section "veille" }}
+  <!-- VEILLE GRID -->
+  <div class="veille-grid">
+    {{ range .Pages }}
+    <div class="veille-card fade-in">
+      <div class="vc-top">
+        <span class="ti-sev sev-{{ .Params.severity | default "medium" }}">{{ .Params.severitylabel | default "Info" }}</span>
+        <span class="ti-date" style="font-family:var(--mono);font-size:.68rem;color:var(--t4)">{{ .Date.Format "02 Jan. 2006" }}</span>
+      </div>
+      <div class="vc-title">{{ .Title }}</div>
+      <div class="vc-desc">{{ .Summary | plainify | truncate 160 }}</div>
+      <div class="vc-bottom">
+        <div>
+          {{ with .Params.cve }}<span class="vc-cve">{{ . }}</span>{{ end }}
+          {{ with .Params.cvss }}<span class="vc-score" style="color:var(--red);margin-left:6px">{{ . }} CVSS</span>{{ end }}
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          {{ range first 3 .Params.tags }}<span class="tag">{{ . }}</span>{{ end }}
+        </div>
+      </div>
+    </div>
+    {{ end }}
+  </div>
+
+  {{ else }}
+  <!-- ARTICLE LIST -->
+  <div class="article-list" id="articles-container">
+    {{ range .Pages }}
+    <a class="article-row fade-in"
+       href="{{ .RelPermalink }}"
+       {{ with .Params.categories }}data-cats="{{ delimit . "," | lower }}"{{ end }}>
+      <div class="ar-num" style="font-family:var(--mono);font-size:.72rem;color:var(--t4);min-width:22px;text-align:right;margin-top:3px;flex-shrink:0">
+        {{ printf "%02d" $.Paginator.PageNumber }}
+      </div>
+      <div class="ar-body">
+        <div class="ar-top">
+          {{ partial "chip-cat.html" .Params.categories }}
+          {{ partial "chip-level.html" .Params.level }}
+        </div>
+        <div class="ar-title">{{ .Title }}</div>
+        <div class="ar-desc">{{ .Summary | plainify | truncate 150 }}</div>
+        <div class="ar-foot">
+          <span class="ar-date">{{ .Date.Format "02 Jan. 2006" }}</span>
+          <span class="ar-time">{{ .Params.readtime | default "15 min" }}</span>
+          {{ range first 3 .Params.tags }}<span class="tag">{{ . }}</span>{{ end }}
+        </div>
+      </div>
+    </a>
+    {{ end }}
+  </div>
+
+  <!-- PAGINATION -->
+  {{ template "_internal/pagination.html" . }}
+  {{ end }}
+</div>
+
+{{ end }}

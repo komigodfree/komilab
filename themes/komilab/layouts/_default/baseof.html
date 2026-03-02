@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode | default "fr" }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.description }}{{ else }}{{ .Title }} · {{ .Site.Title }}{{ end }}</title>
+  <meta name="description" content="{{ if .IsHome }}{{ .Site.Params.description }}{{ else }}{{ .Summary | plainify | truncate 160 }}{{ end }}">
+
+  <!-- Open Graph -->
+  <meta property="og:title"       content="{{ .Title }}">
+  <meta property="og:description" content="{{ .Summary | plainify | truncate 160 }}">
+  <meta property="og:url"         content="{{ .Permalink }}">
+  <meta property="og:type"        content="{{ if .IsPage }}article{{ else }}website{{ end }}">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+  <!-- Highlight.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+
+  <!-- Main CSS -->
+  {{ $css := resources.Get "css/main.css" }}
+  <link rel="stylesheet" href="{{ $css.RelPermalink }}">
+
+  <!-- RSS -->
+  {{ range .AlternativeOutputFormats }}
+  <link rel="{{ .Rel }}" type="{{ .MediaType.Type }}" href="{{ .Permalink }}" title="{{ $.Site.Title }}">
+  {{ end }}
+</head>
+<body>
+
+<div id="reading-progress"></div>
+
+<!-- SEARCH OVERLAY -->
+{{ partial "search.html" . }}
+
+<!-- NAVBAR -->
+{{ partial "navbar.html" . }}
+
+<div class="site-wrap">
+  {{ block "main" . }}{{ end }}
+</div>
+
+<!-- FOOTER -->
+{{ partial "footer.html" . }}
+
+<!-- MAIN JS -->
+{{ $js := resources.Get "js/main.js" }}
+<script src="{{ $js.RelPermalink }}" defer></script>
+
+</body>
+</html>

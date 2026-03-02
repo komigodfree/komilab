@@ -1,0 +1,6 @@
+name        = "komilab"
+license     = "MIT"
+licenselink = "https://opensource.org/licenses/MIT"
+description = "Thème KOMI.LAB — Dark professionnel pour base de connaissances technique"
+homepage    = "https://komilab.org"
+min_version = "0.120.0"

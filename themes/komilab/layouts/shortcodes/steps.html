@@ -1,0 +1,29 @@
+{{/* Shortcode: steps
+Usage:
+  {{< steps >}}
+  1. **Titre étape** — Description
+  2. **Titre étape 2** — Description
+  {{< /steps >}}
+*/}}
+<div class="steps">
+{{ $lines := split (.Inner | strings.TrimSpace) "\n" }}
+{{ range $i, $line := $lines }}
+  {{ $line = strings.TrimSpace $line }}
+  {{ if $line }}
+  {{ $num := add $i 1 }}
+  {{ $content := replaceRE `^\d+\.\s*` "" $line }}
+  {{ $parts := split $content " — " }}
+  <div class="step">
+    <div class="step-num">{{ $num }}</div>
+    <div class="step-body">
+      {{ if gt (len $parts) 1 }}
+      <div class="step-title">{{ index $parts 0 | markdownify }}</div>
+      <div class="step-desc">{{ index $parts 1 | markdownify }}</div>
+      {{ else }}
+      <div class="step-desc">{{ $content | markdownify }}</div>
+      {{ end }}
+    </div>
+  </div>
+  {{ end }}
+{{ end }}
+</div>

@@ -1,0 +1,24 @@
+{{/* Shortcode: code-block
+Usage:
+  {{< code-block file="shell" lang="bash" >}}
+  commande ici
+  {{< /code-block >}}
+*/}}
+{{ $file := .Get "file" | default "" }}
+{{ $lang := .Get "lang" | default "bash" }}
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-meta">
+      {{ if $file }}<span class="code-file">{{ $file }}</span>{{ end }}
+      <span class="code-lang lang-{{ $lang | lower }}">{{ $lang }}</span>
+    </div>
+    <button class="copy-btn" onclick="KL.copy(this)" aria-label="Copier le code">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <rect x="9" y="9" width="13" height="13" rx="2"/>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      </svg>
+      Copier
+    </button>
+  </div>
+  <pre><code class="language-{{ $lang }}">{{ .Inner | htmlEscape }}</code></pre>
+</div>

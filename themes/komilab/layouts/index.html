@@ -1,0 +1,188 @@
+{{ define "main" }}
+
+<!-- MASTHEAD -->
+<div class="masthead">
+  <div class="masthead-line"></div>
+  <div class="masthead-inner">
+    <div class="masthead-kicker">Base de connaissances technique</div>
+    <h1 class="masthead-title">Réseau. Système. Cybersécurité.<br>Cloud. GRC. Automatisation.</h1>
+    <p class="masthead-desc">
+      Guides pratiques, retours d'expérience de laboratoire et veille technique.
+      Des procédures testées, documentées et directement exploitables sur le terrain.
+    </p>
+    <div class="masthead-stats">
+      {{ $guides := where .Site.RegularPages "Section" "guides" }}
+      {{ $veille := where .Site.RegularPages "Section" "veille" }}
+      <div><div class="mstat-n">{{ len $guides }}</div><div class="mstat-l">Guides publiés</div></div>
+      <div><div class="mstat-n">{{ len $veille }}</div><div class="mstat-l">Articles de veille</div></div>
+      <div><div class="mstat-n">6</div><div class="mstat-l">Domaines</div></div>
+      <div><div class="mstat-n">{{ now.Format "2006" }}</div><div class="mstat-l">En continu</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="page-wrap">
+  <div class="main-grid">
+
+    <!-- MAIN COLUMN -->
+    <main>
+
+      <!-- FEATURED -->
+      {{ $featured := where (where .Site.RegularPages "Section" "guides") ".Params.featured" true }}
+      {{ if $featured }}
+      <div class="sec-header">
+        <div class="sec-title">A la une</div>
+      </div>
+      {{ range $featured }}
+      <a class="card-featured fade-in" href="{{ .RelPermalink }}">
+        <div class="cf-top">
+          {{ partial "chip-cat.html" .Params.categories }}
+          {{ partial "chip-level.html" .Params.level }}
+        </div>
+        <div class="cf-title">{{ .Title }}</div>
+        <div class="cf-desc">{{ .Summary | plainify | truncate 200 }}</div>
+        <div class="cf-footer">
+          <div class="cf-meta">
+            <span class="cf-meta-item">{{ .Date.Format "02 Jan. 2006" }}</span>
+            <span class="cf-meta-item">{{ .Params.readtime | default "15 min" }}</span>
+          </div>
+          <div class="cf-tags">
+            {{ range first 4 .Params.tags }}<span class="tag">{{ . }}</span>{{ end }}
+          </div>
+        </div>
+      </a>
+      {{ end }}
+      {{ end }}
+
+      <!-- RECENT GUIDES -->
+      <div class="sec-header" style="margin-top:2.5rem">
+        <div class="sec-title">Publications récentes</div>
+        <a class="sec-link" href="/guides/">
+          Tout voir
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="article-list">
+        {{ $allGuides := where .Site.RegularPages "Section" "guides" }}
+        {{ range first 6 $allGuides }}
+        <a class="article-row fade-in" href="{{ .RelPermalink }}">
+          <div class="ar-num">{{ printf "%02d" (add ($.Site.RegularPages.ByDate.Reverse.Index .) 1) }}</div>
+          <div class="ar-body">
+            <div class="ar-top">
+              {{ partial "chip-cat.html" .Params.categories }}
+              {{ partial "chip-level.html" .Params.level }}
+            </div>
+            <div class="ar-title">{{ .Title }}</div>
+            <div class="ar-desc">{{ .Summary | plainify | truncate 140 }}</div>
+            <div class="ar-foot">
+              <span class="ar-date">{{ .Date.Format "02 Jan. 2006" }}</span>
+              <span class="ar-time">{{ .Params.readtime | default "15 min" }}</span>
+              {{ range first 3 .Params.tags }}<span class="tag">{{ . }}</span>{{ end }}
+            </div>
+          </div>
+        </a>
+        {{ end }}
+      </div>
+
+      <!-- VEILLE PREVIEW -->
+      {{ $latestVeille := first 3 (where .Site.RegularPages "Section" "veille") }}
+      {{ if $latestVeille }}
+      <div class="sec-header" style="margin-top:2.5rem">
+        <div class="sec-title">Veille — Menaces récentes</div>
+        <a class="sec-link" href="/veille/">
+          Tout voir
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="article-list">
+        {{ range $latestVeille }}
+        <div class="article-row fade-in">
+          <div class="ar-num">
+            <span class="ti-sev sev-{{ .Params.severity | default "medium" }}">
+              {{ .Params.severitylabel | default "Info" }}
+            </span>
+          </div>
+          <div class="ar-body">
+            <div class="ar-title">{{ .Title }}</div>
+            <div class="ar-desc">{{ .Summary | plainify | truncate 140 }}</div>
+            <div class="ar-foot">
+              <span class="ar-date">{{ .Date.Format "02 Jan. 2006" }}</span>
+              {{ with .Params.cve }}<span class="ar-date" style="color:var(--amber)">{{ . }}</span>{{ end }}
+              {{ with .Params.cvss }}<span class="ar-date" style="color:var(--red); font-weight:600">{{ . }} CVSS</span>{{ end }}
+            </div>
+          </div>
+        </div>
+        {{ end }}
+      </div>
+      {{ end }}
+
+    </main>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <!-- Alertes -->
+      <div class="sidebar-card">
+        <div class="sidebar-title">Alertes en cours</div>
+        {{ range first 4 (where .Site.RegularPages "Section" "veille") }}
+        <div class="threat-item">
+          <div class="ti-top">
+            <span class="ti-sev sev-{{ .Params.severity | default "medium" }}">{{ .Params.severitylabel | default "Info" }}</span>
+            <span class="ti-date">{{ .Date.Format "02 Jan." }}</span>
+          </div>
+          <div class="ti-title">{{ .Title }}</div>
+          {{ with .Params.cve }}<div class="ti-cve">{{ . }}{{ with $.Params.cvss }} — {{ . }} CVSS{{ end }}</div>{{ end }}
+        </div>
+        {{ end }}
+      </div>
+
+      <!-- Domaines -->
+      <div class="sidebar-card">
+        <div class="sidebar-title">Domaines</div>
+        <div class="cat-list">
+          {{ $cats := .Site.Taxonomies.categories }}
+          {{ $catColors := dict "reseau" "#3b82f6" "systeme" "#10b981" "cybersecurite" "#f43f5e" "cloud" "#38bdf8" "grc" "#f59e0b" "automatisation" "#a78bfa" }}
+          {{ $catLabels := dict "reseau" "Réseau" "systeme" "Système" "cybersecurite" "Cybersécurité" "cloud" "Cloud & Infra" "grc" "GRC" "automatisation" "Automatisation" }}
+          {{ range $name, $pages := $cats }}
+          {{ $color := index $catColors $name | default "#3b82f6" }}
+          {{ $label := index $catLabels $name | default $name }}
+          <a class="cat-item" href="/categories/{{ $name }}/">
+            <div style="display:flex;align-items:center;gap:9px">
+              <div class="cat-dot" style="background:{{ $color }}"></div>
+              <span class="cat-name">{{ $label }}</span>
+            </div>
+            <span class="cat-count">{{ len $pages }}</span>
+          </a>
+          {{ end }}
+        </div>
+      </div>
+
+      <!-- Tags -->
+      <div class="sidebar-card">
+        <div class="sidebar-title">Technologies</div>
+        <div class="tag-cloud">
+          {{ range $name, $pages := .Site.Taxonomies.tags }}
+          <a class="tag-pill" href="/tags/{{ $name | urlize }}/">{{ $name }}</a>
+          {{ end }}
+        </div>
+      </div>
+
+      <!-- Newsletter -->
+      <div class="sidebar-card">
+        <div class="sidebar-title">Notifications</div>
+        <p class="nl-desc">Recevoir les nouveaux guides et alertes de veille par email.</p>
+        <div class="nl-form">
+          <input class="nl-input" type="email" placeholder="votre@email.com">
+          <button class="nl-btn" onclick="KL.subscribe(this)">OK</button>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+{{ end }}

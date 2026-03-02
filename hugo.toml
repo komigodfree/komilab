@@ -1,0 +1,68 @@
+baseURL = "https://komilab.org/"
+languageCode = "fr-FR"
+title = "KOMI.LAB"
+theme = "komilab"
+paginate = 10
+enableRobotsTXT = true
+enableGitInfo = true
+
+[markup]
+  [markup.highlight]
+    noClasses = false
+    lineNos = false
+    codeFences = true
+  [markup.goldmark.renderer]
+    unsafe = true
+
+[params]
+  description = "Base de connaissances technique — Réseau, Système, Cybersécurité, Cloud, GRC"
+  subtitle    = "Knowledge Base"
+  domain      = "komilab.org"
+  github      = "https://github.com/komilab"
+  linkedin    = "https://linkedin.com/in/komi-kpodohoui"
+
+[taxonomies]
+  category = "categories"
+  tag      = "tags"
+
+[menu]
+  [[menu.main]]
+    name   = "Guides & Labs"
+    url    = "/guides/"
+    weight = 1
+  [[menu.main]]
+    name   = "Veille"
+    url    = "/veille/"
+    weight = 2
+  [[menu.main]]
+    name   = "Réseau"
+    url    = "/categories/reseau/"
+    weight = 3
+  [[menu.main]]
+    name   = "Système"
+    url    = "/categories/systeme/"
+    weight = 4
+  [[menu.main]]
+    name   = "Cybersécurité"
+    url    = "/categories/cybersecurite/"
+    weight = 5
+  [[menu.main]]
+    name   = "Cloud & Infra"
+    url    = "/categories/cloud/"
+    weight = 6
+  [[menu.main]]
+    name   = "GRC"
+    url    = "/categories/grc/"
+    weight = 7
+  [[menu.main]]
+    name   = "Automatisation"
+    url    = "/categories/automatisation/"
+    weight = 8
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
+[[outputFormats.JSON]]
+  mediaType = "application/json"
+  baseName  = "search-index"
+  isPlainText = true
