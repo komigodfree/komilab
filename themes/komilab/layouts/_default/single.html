@@ -3,7 +3,7 @@
 
   <!-- MAIN CONTENT -->
   <article>
-    <a class="article-back" href="{{ .Section | relURL }}">
+    <a class="article-back" href="{{ printf "/%s/" .Section | relURL }}">
       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path d="M19 12H5M12 19l-7-7 7-7"/>
       </svg>
@@ -20,6 +20,7 @@
         <span class="article-meta-item">{{ .Params.readtime | default "15 min de lecture" }}</span>
         {{ partial "chip-level.html" .Params.level }}
       </div>
+
       {{ with .Params.tags }}
       <div class="article-tags">
         {{ range . }}<span class="tag">{{ . }}</span>{{ end }}
@@ -39,6 +40,7 @@
         <span style="font-size:.875rem;color:var(--t1);font-weight:600;line-height:1.35">{{ .Title }}</span>
       </a>
       {{ end }}
+
       {{ with .NextInSection }}
       <a href="{{ .RelPermalink }}" style="display:flex;flex-direction:column;gap:4px;max-width:48%;text-align:right;margin-left:auto">
         <span style="font-family:var(--mono);font-size:.68rem;color:var(--t3);text-transform:uppercase;letter-spacing:.06em">Suivant</span>
@@ -51,11 +53,12 @@
 
   <!-- TOC SIDEBAR -->
   <aside>
-    {{ if .TableOfContents }}
+    {{ $toc := .TableOfContents }}
+    {{ if and $toc (ne $toc "<nav id=\"TableOfContents\"></nav>") }}
     <div class="toc-card">
       <div class="toc-title">Table des matières</div>
       <nav class="toc-nav" id="toc-nav">
-        {{ .TableOfContents }}
+        {{ $toc }}
       </nav>
     </div>
     {{ end }}
@@ -64,28 +67,38 @@
 </div>
 
 <script>
-// Reading progress
-window.addEventListener('scroll', () => {
-  const el   = document.getElementById('article-body');
-  const bar  = document.getElementById('reading-progress');
-  if (!el || !bar) return;
-  const top  = el.getBoundingClientRect().top + window.scrollY - 100;
-  const bot  = top + el.offsetHeight;
-  const pct  = Math.min(Math.max((window.scrollY - top) / (bot - top) * 100, 0), 100);
-  bar.style.width = pct + '%';
-});
+(function () {
+  // Reading progress
+  window.addEventListener('scroll', () => {
+    const el  = document.getElementById('article-body');
+    const bar = document.getElementById('reading-progress');
+    if (!el || !bar) return;
 
-// TOC active link
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    const id   = e.target.getAttribute('id');
-    const link = document.querySelector('#toc-nav a[href="#' + id + '"]');
-    if (!link) return;
-    link.classList.toggle('active', e.isIntersecting);
+    const top = el.getBoundingClientRect().top + window.scrollY - 100;
+    const bot = top + el.offsetHeight;
+    const denom = (bot - top) || 1;
+    const pct = Math.min(Math.max(((window.scrollY - top) / denom) * 100, 0), 100);
+    bar.style.width = pct + '%';
   });
-}, { rootMargin:'-20% 0% -70% 0%' });
 
-document.querySelectorAll('#article-body h2[id], #article-body h3[id]')
-  .forEach(h => observer.observe(h));
+  // TOC active link
+  const tocNav = document.getElementById('toc-nav');
+  if (!tocNav) return;
+
+  const headings = document.querySelectorAll('#article-body h2[id], #article-body h3[id]');
+  if (!headings || headings.length === 0) return;
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      const id = e.target.getAttribute('id');
+      if (!id) return;
+      const link = tocNav.querySelector('a[href="#' + id + '"]');
+      if (!link) return;
+      link.classList.toggle('active', e.isIntersecting);
+    });
+  }, { rootMargin:'-20% 0% -70% 0%' });
+
+  headings.forEach(h => observer.observe(h));
+})();
 </script>
 {{ end }}
