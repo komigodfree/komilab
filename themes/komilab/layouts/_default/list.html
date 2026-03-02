@@ -4,18 +4,18 @@
   <div class="masthead-line"></div>
   <div class="masthead-inner">
     {{ if .IsHome }}
-    <div class="masthead-kicker">Tous les guides</div>
+      <div class="masthead-kicker">Tous les guides</div>
     {{ else if eq .Section "veille" }}
-    <div class="masthead-kicker">Veille Cybersécurité</div>
-    <h1 class="masthead-title" style="font-size:1.8rem">Menaces, CVE et tendances</h1>
-    <p class="masthead-desc" style="margin-bottom:0">Surveillance continue des vulnérabilités et du paysage des menaces.</p>
+      <div class="masthead-kicker">Veille Cybersécurité</div>
+      <h1 class="masthead-title" style="font-size:1.8rem">Menaces, CVE et tendances</h1>
+      <p class="masthead-desc" style="margin-bottom:0">Surveillance continue des vulnérabilités et du paysage des menaces.</p>
     {{ else if .IsSection }}
-    <div class="masthead-kicker">{{ .Section | title }}</div>
-    <h1 class="masthead-title" style="font-size:1.8rem">{{ .Title }}</h1>
-    {{ with .Description }}<p class="masthead-desc" style="margin-bottom:0">{{ . }}</p>{{ end }}
+      <div class="masthead-kicker">{{ .Section | title }}</div>
+      <h1 class="masthead-title" style="font-size:1.8rem">{{ .Title }}</h1>
+      {{ with .Description }}<p class="masthead-desc" style="margin-bottom:0">{{ . }}</p>{{ end }}
     {{ else }}
-    <div class="masthead-kicker">{{ .Title }}</div>
-    <h1 class="masthead-title" style="font-size:1.8rem">{{ .Title }}</h1>
+      <div class="masthead-kicker">{{ .Title }}</div>
+      <h1 class="masthead-title" style="font-size:1.8rem">{{ .Title }}</h1>
     {{ end }}
   </div>
 </div>
@@ -37,7 +37,8 @@
   {{ if eq .Section "veille" }}
   <!-- VEILLE GRID -->
   <div class="veille-grid">
-    {{ range .Pages }}
+    {{ $vpages := sort .Pages "Date" "desc" }}
+    {{ range $vpages }}
     <div class="veille-card fade-in">
       <div class="vc-top">
         <span class="ti-sev sev-{{ .Params.severity | default "medium" }}">{{ .Params.severitylabel | default "Info" }}</span>
@@ -51,7 +52,9 @@
           {{ with .Params.cvss }}<span class="vc-score" style="color:var(--red);margin-left:6px">{{ . }} CVSS</span>{{ end }}
         </div>
         <div style="display:flex;gap:5px;flex-wrap:wrap">
-          {{ range first 3 .Params.tags }}<span class="tag">{{ . }}</span>{{ end }}
+          {{ with .Params.tags }}
+            {{ range (first 3 .) }}<span class="tag">{{ . }}</span>{{ end }}
+          {{ end }}
         </div>
       </div>
     </div>
@@ -60,25 +63,31 @@
 
   {{ else }}
   <!-- ARTICLE LIST -->
+  {{ $sorted := sort .Pages "Date" "desc" }}
+  {{ $p := .Paginate $sorted 10 }}
+
   <div class="article-list" id="articles-container">
-    {{ range .Pages }}
+    {{ $offset := mul (sub $p.PageNumber 1) $p.PageSize }}
+    {{ range $i, $page := $p.Pages }}
     <a class="article-row fade-in"
-       href="{{ .RelPermalink }}"
-       {{ with .Params.categories }}data-cats="{{ delimit . "," | lower }}"{{ end }}>
+       href="{{ $page.RelPermalink }}"
+       {{ with $page.Params.categories }}data-cats="{{ delimit . "," | lower }}"{{ end }}>
       <div class="ar-num" style="font-family:var(--mono);font-size:.72rem;color:var(--t4);min-width:22px;text-align:right;margin-top:3px;flex-shrink:0">
-        {{ printf "%02d" $.Paginator.PageNumber }}
+        {{ printf "%02d" (add (add $offset $i) 1) }}
       </div>
       <div class="ar-body">
         <div class="ar-top">
-          {{ partial "chip-cat.html" .Params.categories }}
-          {{ partial "chip-level.html" .Params.level }}
+          {{ partial "chip-cat.html" $page.Params.categories }}
+          {{ partial "chip-level.html" $page.Params.level }}
         </div>
-        <div class="ar-title">{{ .Title }}</div>
-        <div class="ar-desc">{{ .Summary | plainify | truncate 150 }}</div>
+        <div class="ar-title">{{ $page.Title }}</div>
+        <div class="ar-desc">{{ $page.Summary | plainify | truncate 150 }}</div>
         <div class="ar-foot">
-          <span class="ar-date">{{ .Date.Format "02 Jan. 2006" }}</span>
-          <span class="ar-time">{{ .Params.readtime | default "15 min" }}</span>
-          {{ range first 3 .Params.tags }}<span class="tag">{{ . }}</span>{{ end }}
+          <span class="ar-date">{{ $page.Date.Format "02 Jan. 2006" }}</span>
+          <span class="ar-time">{{ $page.Params.readtime | default "15 min" }}</span>
+          {{ with $page.Params.tags }}
+            {{ range (first 3 .) }}<span class="tag">{{ . }}</span>{{ end }}
+          {{ end }}
         </div>
       </div>
     </a>
