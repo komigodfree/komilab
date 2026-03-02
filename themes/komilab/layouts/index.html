@@ -33,7 +33,7 @@
       <div class="sec-header">
         <div class="sec-title">A la une</div>
       </div>
-      {{ range $featured }}
+      {{ range (sort $featured "Date" "desc") }}
       <a class="card-featured fade-in" href="{{ .RelPermalink }}">
         <div class="cf-top">
           {{ partial "chip-cat.html" .Params.categories }}
@@ -47,7 +47,9 @@
             <span class="cf-meta-item">{{ .Params.readtime | default "15 min" }}</span>
           </div>
           <div class="cf-tags">
-            {{ range first 4 .Params.tags }}<span class="tag">{{ . }}</span>{{ end }}
+            {{ with .Params.tags }}
+              {{ range (first 4 .) }}<span class="tag">{{ . }}</span>{{ end }}
+            {{ end }}
           </div>
         </div>
       </a>
@@ -64,22 +66,26 @@
           </svg>
         </a>
       </div>
+
       <div class="article-list">
-        {{ $allGuides := where .Site.RegularPages "Section" "guides" }}
-        {{ range first 6 $allGuides }}
-        <a class="article-row fade-in" href="{{ .RelPermalink }}">
-          <div class="ar-num">{{ printf "%02d" (add ($.Site.RegularPages.ByDate.Reverse.Index .) 1) }}</div>
+        {{ $allGuides := sort (where .Site.RegularPages "Section" "guides") "Date" "desc" }}
+        {{ range $i, $p := (first 6 $allGuides) }}
+        <a class="article-row fade-in" href="{{ $p.RelPermalink }}">
+          <!-- FIX: numérotation stable sans .Index -->
+          <div class="ar-num">{{ printf "%02d" (add $i 1) }}</div>
           <div class="ar-body">
             <div class="ar-top">
-              {{ partial "chip-cat.html" .Params.categories }}
-              {{ partial "chip-level.html" .Params.level }}
+              {{ partial "chip-cat.html" $p.Params.categories }}
+              {{ partial "chip-level.html" $p.Params.level }}
             </div>
-            <div class="ar-title">{{ .Title }}</div>
-            <div class="ar-desc">{{ .Summary | plainify | truncate 140 }}</div>
+            <div class="ar-title">{{ $p.Title }}</div>
+            <div class="ar-desc">{{ $p.Summary | plainify | truncate 140 }}</div>
             <div class="ar-foot">
-              <span class="ar-date">{{ .Date.Format "02 Jan. 2006" }}</span>
-              <span class="ar-time">{{ .Params.readtime | default "15 min" }}</span>
-              {{ range first 3 .Params.tags }}<span class="tag">{{ . }}</span>{{ end }}
+              <span class="ar-date">{{ $p.Date.Format "02 Jan. 2006" }}</span>
+              <span class="ar-time">{{ $p.Params.readtime | default "15 min" }}</span>
+              {{ with $p.Params.tags }}
+                {{ range (first 3 .) }}<span class="tag">{{ . }}</span>{{ end }}
+              {{ end }}
             </div>
           </div>
         </a>
@@ -87,7 +93,7 @@
       </div>
 
       <!-- VEILLE PREVIEW -->
-      {{ $latestVeille := first 3 (where .Site.RegularPages "Section" "veille") }}
+      {{ $latestVeille := first 3 (sort (where .Site.RegularPages "Section" "veille") "Date" "desc") }}
       {{ if $latestVeille }}
       <div class="sec-header" style="margin-top:2.5rem">
         <div class="sec-title">Veille — Menaces récentes</div>
@@ -128,14 +134,19 @@
       <!-- Alertes -->
       <div class="sidebar-card">
         <div class="sidebar-title">Alertes en cours</div>
-        {{ range first 4 (where .Site.RegularPages "Section" "veille") }}
+        {{ $veilleList := first 4 (sort (where .Site.RegularPages "Section" "veille") "Date" "desc") }}
+        {{ range $veilleList }}
         <div class="threat-item">
           <div class="ti-top">
             <span class="ti-sev sev-{{ .Params.severity | default "medium" }}">{{ .Params.severitylabel | default "Info" }}</span>
             <span class="ti-date">{{ .Date.Format "02 Jan." }}</span>
           </div>
           <div class="ti-title">{{ .Title }}</div>
-          {{ with .Params.cve }}<div class="ti-cve">{{ . }}{{ with $.Params.cvss }} — {{ . }} CVSS{{ end }}</div>{{ end }}
+          {{ with .Params.cve }}
+            <div class="ti-cve">
+              {{ . }}{{ with $.Params.cvss }} — {{ . }} CVSS{{ end }}
+            </div>
+          {{ end }}
         </div>
         {{ end }}
       </div>
